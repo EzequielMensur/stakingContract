@@ -1,0 +1,102 @@
+{
+    // Use IntelliSense para saber los atributos posibles.
+    // Mantenga el puntero para ver las descripciones de los existentes atributos.
+    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'staking-contract'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=staking-contract"
+                ],
+                "filter": {
+                    "name": "staking-contract",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'staking_contract_scenario_rs_test'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=staking_contract_scenario_rs_test",
+                    "--package=staking-contract"
+                ],
+                "filter": {
+                    "name": "staking_contract_scenario_rs_test",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'staking_contract_scenario_go_test'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=staking_contract_scenario_go_test",
+                    "--package=staking-contract"
+                ],
+                "filter": {
+                    "name": "staking_contract_scenario_go_test",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'staking-contract-meta'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=staking-contract-meta",
+                    "--package=staking-contract-meta"
+                ],
+                "filter": {
+                    "name": "staking-contract-meta",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'staking-contract-meta'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=staking-contract-meta",
+                    "--package=staking-contract-meta"
+                ],
+                "filter": {
+                    "name": "staking-contract-meta",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

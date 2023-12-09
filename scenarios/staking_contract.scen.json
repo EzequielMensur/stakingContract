@@ -1,0 +1,42 @@
+{
+    "name": "stakeSuccessful",
+    "steps": [
+        {
+            "step": "scCall",
+            "id": "stake",
+            "tx": {
+                "from": "address:user1",
+                "to": "sc:staking",
+                "function": "stake",
+                "arguments": [
+                    {
+                        "value": "1000000000000000000",
+                        "type": "u64"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "out": [],
+                "status": "",
+                "logs": [],
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "assert",
+            "condition": {
+                "accounts": {
+                    "address:user1": {
+                        "stakeBalance": "1000000000000000000"
+                    },
+                    "address:staking": {
+                        "totalStaking": "1000000000000000000"
+                    }
+                }
+            }
+        }
+    ]
+}
