@@ -53,8 +53,8 @@ pub trait StakingContract {
                 last_action_block: current_block,
             }
         };
-
         self.claim_rewards_for_user(&caller, &mut staking_pos);
+
         self.update_total_staking(&payment_amount);
         staking_pos.stake_amount += payment_amount;
         stake_mapper.set(&staking_pos);
@@ -105,13 +105,13 @@ pub trait StakingContract {
         stake_mapper.set(&staking_pos);
     }
 
-     //Private Functions
+    //Private Functions
 
-     fn require_user_staked(&self, user: &ManagedAddress) {
+    fn require_user_staked(&self, user: &ManagedAddress) {
         require!(self.staked_addresses().contains(user), "Must stake first");
     }
 
-     fn claim_rewards_for_user(
+    fn claim_rewards_for_user(
         &self,
         user: &ManagedAddress,
         staking_pos: &mut StakingPosition<Self::Api>,
@@ -158,21 +158,30 @@ pub trait StakingContract {
         let new_total_staking = current_total_staking - amount;
         self.total_staking().set(&new_total_staking);
     }
-
-
+    
+    
     //view functions
+
+    #[view(calculateRewardsForUser)]
+    fn calculate_rewards_for_user(&self, addr: ManagedAddress) -> BigUint {
+        let staking_pos = self.staking_position(&addr).get();
+        self.calculate_rewards(&staking_pos)
+    }
+
+    //storage
+
     #[view(getStakedAddresses)]
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     #[view(getStakingPosition)]
     #[storage_mapper("stakingPosition")]
-    fn staking_position(&self, addr: &ManagedAddress) -> SingleValueMapper<BigUint>;
-    
-
-
-    //storage
+    fn staking_position(
+        &self,
+        addr: &ManagedAddress,
+    ) -> SingleValueMapper<StakingPosition<Self::Api>>;
 
     #[storage_mapper("totalStaking")]
     fn total_staking(&self) -> SingleValueMapper<BigUint<Self::Api>>;
+
 }
