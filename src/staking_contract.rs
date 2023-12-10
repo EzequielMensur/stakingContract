@@ -29,6 +29,8 @@ pub trait StakingContract {
     #[init]
     fn init(&self) {}
 
+    //endpoint
+
     #[payable("EGLD")]
     #[endpoint]
     fn stake(&self) {
@@ -41,6 +43,11 @@ pub trait StakingContract {
         self.staked_addresses().insert(caller);
     }
 
+     //Private Functions
+
+
+
+    //view functions
     #[view(getStakedAddresses)]
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
@@ -49,4 +56,7 @@ pub trait StakingContract {
     #[storage_mapper("stakingPosition")]
     fn staking_position(&self, addr: &ManagedAddress) -> SingleValueMapper<BigUint>;
     
+
+
+    //storage
 }
