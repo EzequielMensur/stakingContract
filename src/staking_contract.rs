@@ -77,6 +77,21 @@ pub trait StakingContract {
         &reward_per_round * seconds_elapsed * user_share
     }
 
+    fn update_total_staking(&self, amount: &BigUint<Self::Api>) {
+        let current_total_staking = self.total_staking().get();
+        let new_total_staking = current_total_staking + amount;
+        self.total_staking().set(&new_total_staking);
+    }
+
+    fn decrease_total_staking(&self, amount: &BigUint<Self::Api>) {
+        let current_total_staking = self.total_staking().get();
+    
+        require!(amount <= &current_total_staking, "Cannot subtract more than total staking");
+    
+        let new_total_staking = current_total_staking - amount;
+        self.total_staking().set(&new_total_staking);
+    }
+
 
     //view functions
     #[view(getStakedAddresses)]
