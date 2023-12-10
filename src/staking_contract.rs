@@ -93,6 +93,18 @@ pub trait StakingContract {
         self.send().direct_non_zero_egld(&caller, &unstake_amount);
     }
 
+    #[endpoint(claimRewards)]
+    fn claim_rewards(&self) {
+        let caller = self.blockchain().get_caller();
+        self.require_user_staked(&caller);
+
+        let stake_mapper = self.staking_position(&caller);
+        let mut staking_pos = stake_mapper.get();
+        self.claim_rewards_for_user(&caller, &mut staking_pos);
+
+        stake_mapper.set(&staking_pos);
+    }
+
      //Private Functions
 
      fn require_user_staked(&self, user: &ManagedAddress) {
