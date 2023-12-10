@@ -44,7 +44,38 @@ pub trait StakingContract {
     }
 
      //Private Functions
+     fn claim_rewards_for_user(
+        &self,
+        user: &ManagedAddress,
+        staking_pos: &mut StakingPosition<Self::Api>,
+    ) {
+        let reward_amount = self.calculate_rewards(staking_pos);
+        let current_block = self.blockchain().get_block_nonce();
+        staking_pos.last_action_block = current_block;
 
+        if reward_amount > 0 {
+            self.send().direct_egld(user, &reward_amount);
+        }
+    }
+
+    fn calculate_rewards(&self, staking_position: &StakingPosition<Self::Api>) -> BigUint {
+
+        let current_total_staking = self.total_staking().get();
+        let reward_per_round = BigUint::from(300u64);
+        let current_block = self.blockchain().get_block_nonce();
+        let user_stake = &staking_position.stake_amount;
+
+        if current_block <= staking_position.last_action_block {
+            return BigUint::zero();
+        }
+
+        let user_share = user_stake / &current_total_staking;
+
+        let block_diff: u64 = current_block - staking_position.last_action_block;
+        let seconds_elapsed = block_diff * 6;
+
+        &reward_per_round * seconds_elapsed * user_share
+    }
 
 
     //view functions
@@ -59,4 +90,7 @@ pub trait StakingContract {
 
 
     //storage
+
+    #[storage_mapper("totalStaking")]
+    fn total_staking(&self) -> SingleValueMapper<BigUint<Self::Api>>;
 }
