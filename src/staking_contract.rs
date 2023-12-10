@@ -53,14 +53,52 @@ pub trait StakingContract {
                 last_action_block: current_block,
             }
         };
-        
+
         self.claim_rewards_for_user(&caller, &mut staking_pos);
         self.update_total_staking(&payment_amount);
         staking_pos.stake_amount += payment_amount;
         stake_mapper.set(&staking_pos);
     }
 
+    #[endpoint]
+    fn unstake(&self, opt_unstake_amount: OptionalValue<BigUint>) {
+        // Fase de Checks
+        let caller = self.blockchain().get_caller();
+        self.require_user_staked(&caller);
+    
+        let stake_mapper = self.staking_position(&caller);
+        let mut staking_pos = stake_mapper.get();
+    
+        let unstake_amount = match opt_unstake_amount {
+            OptionalValue::Some(amt) => amt,
+            OptionalValue::None => staking_pos.stake_amount.clone(),
+        };
+        require!(
+            unstake_amount > 0 && unstake_amount <= staking_pos.stake_amount,
+            "Invalid unstake amount"
+        );
+        // Fase de Effects
+        staking_pos.stake_amount -= &unstake_amount;
+    
+        if staking_pos.stake_amount > 0 {
+            stake_mapper.set(&staking_pos);
+        } else {
+            stake_mapper.clear();
+            self.staked_addresses().swap_remove(&caller);
+        }
+        self.decrease_total_staking(&unstake_amount);
+    
+        // Fase de Interactions
+        self.claim_rewards_for_user(&caller, &mut staking_pos);
+        self.send().direct_non_zero_egld(&caller, &unstake_amount);
+    }
+
      //Private Functions
+
+     fn require_user_staked(&self, user: &ManagedAddress) {
+        require!(self.staked_addresses().contains(user), "Must stake first");
+    }
+
      fn claim_rewards_for_user(
         &self,
         user: &ManagedAddress,
