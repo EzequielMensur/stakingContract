@@ -3,6 +3,9 @@ use multiversx_sc::codec::{EncodeDefault, DecodeDefault};
 
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
+
+pub const BLOCKS_IN_YEAR: u64 = 60 * 60 * 24 * 365 / 6;
+pub const MAX_PERCENTAGE: u64 = 10_000;
 #[derive(TypeAbi, TopEncodeOrDefault, TopDecodeOrDefault, PartialEq, Debug)]
 pub struct StakingPosition<M: ManagedTypeApi> {
     pub stake_amount: BigUint<M>,
@@ -38,9 +41,23 @@ pub trait StakingContract {
         require!(payment_amount > 0, "Must pay more than 0");
 
         let caller = self.blockchain().get_caller();
-        self.staking_position(&caller)
-            .update(|current_amount| *current_amount += payment_amount);
-        self.staked_addresses().insert(caller);
+        let stake_mapper = self.staking_position(&caller);
+
+        let new_user = self.staked_addresses().insert(caller.clone());
+        let mut staking_pos = if !new_user {
+            stake_mapper.get()
+        } else {
+            let current_block = self.blockchain().get_block_epoch();
+            StakingPosition {
+                stake_amount: BigUint::zero(),
+                last_action_block: current_block,
+            }
+        };
+        
+        self.claim_rewards_for_user(&caller, &mut staking_pos);
+        self.update_total_staking(&payment_amount);
+        staking_pos.stake_amount += payment_amount;
+        stake_mapper.set(&staking_pos);
     }
 
      //Private Functions
