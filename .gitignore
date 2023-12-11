@@ -6,3 +6,5 @@
 **/erdpy.data-storage.json
 **/*.interaction.json
 **/target
+**/walletKey.pem
+**/wallet.pem

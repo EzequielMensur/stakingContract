@@ -1,7 +1,40 @@
-Staking Contract
+# Staking Contract
+
 Overview
 
 The Staking Contract is a smart contract built on the Elrond blockchain that allows users to stake EGLD tokens and earn rewards over time. The contract provides functionalities for staking, unstaking, claiming rewards, and checking stake-related information.
+
+Procedure
+
+1) build contract --> mxpy contract build
+2) Select wallet --> <https://devnet-wallet.multiversx.com>
+3) Create account
+4) Create key.pem file
+5) Ask for EGLD in a faucet <https://devnet-wallet.multiversx.com/faucet>
+6) Deploy contract
+
+mxpy --verbose contract deploy --bytecode=./output/staking-contract.wasm --recall-nonce --pem=./wallet.pem --gas-limit=40000000 --send --outfile="upgrade-devnet.interaction.json" --proxy=https://devnet-gateway.multiversx.com --chain=D
+
+Result
+
+New user account --> erd1hgulazcqjqcrj8mguurzvr4s4p5rkrsl50ca7sw8jhq8ak93esssyt5x8f
+
+New smart constract account --> erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu
+Transaction Fee --> 0.01825465 xEGLD
+gas used --> 2097245
+
+Challenge
+
+● Users can deposit their EGLD tokens into the contract to become a
+staker.
+● Assume rewards are distributed based on a global speed. For
+example, 0.0003 EGLD are distributed per second among all users.
+● Users earn rewards in proportion to their stake. These rewards are
+continuously distributed (of course, they are kept at the staking smart
+contract).
+● Users can withdraw their staked EGLD or claim their rewards at any
+time.
+
 Constants
 
     BLOCKS_IN_YEAR: The number of blocks in a year.
@@ -14,14 +47,16 @@ Struct: StakingPosition
 
 Implementation of EncodeDefault and DecodeDefault
 
-The EncodeDefault and DecodeDefault traits are implemented for the StakingPosition struct, allowing default encoding and decoding.
+The EncodeDefault and DecodeDefault traits are implemented for the StakingPosition struct, allowing default encoding and decoding. They are necessary for correctly decoding. More info:
+
+ <https://docs.multiversx.com/developers/data/defaults>
+
 Contract Functions
 init
 
     Description: Initializes the Staking Contract.
 
 stake
-
     Payable: Accepts EGLD tokens.
     Endpoint: Allows users to stake EGLD tokens.
     Logic:
@@ -31,6 +66,7 @@ stake
         Updates the total staking amount.
         Updates the user's staking position.
 
+**We assume that before staking more tokens, we need to claims pending rewards. That is not on the callenge.**
 unstake
 
     Endpoint: Allows users to unstake EGLD tokens.
@@ -42,6 +78,8 @@ unstake
         Performs unstaking effects.
         Claims rewards for the user.
         Sends the unstaked amount to the user.
+
+**We use the pattern check-effects-interaction to avoid the re-entrancy attack.**
 
 claim_rewards
 
@@ -91,30 +129,3 @@ staking_position
 total_staking
 
     Description: Stores the total staking amount.
-
-Usage
-
-    Initialization:
-        Call the init function.
-
-    Staking:
-        Call the stake function with EGLD payment.
-
-    Unstaking:
-        Call the unstake function with an optional unstake amount.
-
-    Claiming Rewards:
-        Call the claim_rewards function.
-
-    Checking Stake Percentage:
-        Call the get_stake_percentage function.
-
-    Calculating Rewards for a User:
-        Call the calculate_rewards_for_user function.
-
-Important Notes
-
-    Users must stake EGLD before unstaking or claiming rewards.
-    Rewards are calculated based on staking duration and the user's stake percentage.
-
-Feel free to customize and extend the contract based on your specific requirements.
